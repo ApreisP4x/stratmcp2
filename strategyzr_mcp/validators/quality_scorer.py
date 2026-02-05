@@ -7,7 +7,17 @@ BMC Attractiveness: 6 Dimensions of Business Model Attractiveness (max 30 points
 
 from typing import Any
 
-from ..models.common import QualityScore, ValidationResult, Recommendation
+from ..models.common import (
+    QualityScore,
+    ValidationResult,
+    Recommendation,
+    RelationshipType,
+    ResourceType,
+    ActivityType,
+    RevenueType,
+    CostType,
+    ChannelPhase,
+)
 from ..models.vpc import VPCInput, CustomerProfile, ValueMap, FitScore
 from ..models.bmc import BMCInput, AttractivenessScore
 

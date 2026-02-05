@@ -107,7 +107,7 @@ class QualityScore(BaseModel):
     def create(cls, breakdown: dict[str, float], max_per_criterion: float = 5.0) -> "QualityScore":
         """Create a quality score from criterion breakdown."""
         total = sum(breakdown.values())
-        max_score = len(breakdown) * max_per_criterion
+        max_score = len(breakdown) * max_per_criterion if breakdown else 1.0  # Default to 1 to avoid division by zero
         return cls(
             total_score=total,
             max_score=max_score,
