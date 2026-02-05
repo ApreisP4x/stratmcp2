@@ -1,16 +1,15 @@
 """
-StrategyZR MCP Server - Alternative Implementation
+StrategyZR MCP Server
 
 A structured data approach to Business Model Canvas and Value Proposition Canvas
 using Pydantic models for validation and computed quality scores.
 
-This server provides 6 tools:
-1. strategyzr_create_vpc - Create a Value Proposition Canvas
-2. strategyzr_create_bmc - Create a Business Model Canvas
-3. strategyzr_validate_canvas - Validate and score an existing canvas
-4. strategyzr_analyze_fit - Analyze fit between VPC and BMC
-5. strategyzr_compare_competitors - Competitive analysis
-6. strategyzr_get_template - Get empty canvas templates
+This server provides 5 tools:
+1. create_vpc - Create a Value Proposition Canvas
+2. create_bmc - Create a Business Model Canvas
+3. validate - Validate and score an existing canvas
+4. analyze_fit - Analyze fit between VPC and BMC
+5. compare - Competitive analysis
 """
 
 import json
@@ -29,22 +28,40 @@ from .tools.analysis_tools import validate_canvas, analyze_fit, compare_competit
 # Initialize FastMCP server
 mcp = FastMCP(
     name="strategyzr_mcp",
-    instructions="""
-StrategyZR MCP Server - Strategic Canvas Tools
+    instructions="""StrategyZR builds and scores Osterwalder strategy canvases (Value Proposition Canvas and Business Model Canvas). All inputs are Pydantic-validated; all outputs include computed quality scores and actionable recommendations.
 
-This server provides structured tools for creating and analyzing business strategy canvases
-based on Osterwalder's frameworks:
+## Recommended workflow
+1. Read template resources (`strategyzr://template/vpc`, `strategyzr://template/bmc`) to understand required fields.
+2. `create_vpc` — build the Value Proposition Canvas for a customer segment.
+3. `create_bmc` — build the Business Model Canvas (pass vpc_data to check alignment).
+4. `validate` — score either canvas against Osterwalder best practices.
+5. `analyze_fit` — measure Problem-Solution Fit and Product-Market Fit indicators.
+6. `compare` — map competitor value propositions for differentiation analysis.
 
-- Value Proposition Canvas (VPC): Customer Profile + Value Map
-- Business Model Canvas (BMC): 9 building blocks of a business model
+## Tool guide
+- **create_vpc**: Use when designing or documenting a value proposition for a specific customer segment.
+- **create_bmc**: Use when describing how a business creates, delivers, and captures value.
+- **validate**: Use when the user has canvas data and wants quality feedback or gap analysis.
+- **analyze_fit**: Use when you need to measure alignment between customer needs and the value proposition (and optionally the business model).
+- **compare**: Use when the user wants to understand competitive positioning or differentiation opportunities.
 
-Key features:
-- Pydantic validation for all inputs
-- Computed quality scores (10 Characteristics, Attractiveness)
-- Fit analysis between VPC and BMC
-- Competitive positioning analysis
+## Scoring thresholds
+- VPC Quality: max 50 pts (10 characteristics x 5). Above 35 = strong.
+- BMC Attractiveness: max 35 pts (7 dimensions x 5). Above 25 = strong.
+- Fit scores: >70% = strong alignment, 40-70% = moderate, <40% = weak.
 
-Use strategyzr_get_template to get empty templates with guidance before creating canvases.
+## Valid enum values (quick reference)
+- **job_type**: functional, social, emotional
+- **gain_type**: required, expected, desired, unexpected
+- **channel_phase**: awareness, evaluation, purchase, delivery, after_sales
+- **relationship_type**: personal_assistance, dedicated_assistance, self_service, automated, communities, co_creation
+- **resource_type**: physical, intellectual, human, financial
+- **activity_type**: production, problem_solving, platform
+- **revenue_type**: asset_sale, usage_fee, subscription, lending, licensing, brokerage, advertising
+- **pricing_mechanism**: fixed, dynamic, auction, market_dependent, volume_dependent, negotiation
+- **cost_type**: fixed, variable
+- **business_stage**: idea, startup, growth, mature
+- **segment_type**: mass_market, niche, segmented, diversified, multi_sided
 """,
 )
 
@@ -54,11 +71,12 @@ Use strategyzr_get_template to get empty templates with guidance before creating
 # =============================================================================
 
 @mcp.tool(
+    name="create_vpc",
     annotations={
         "readOnlyHint": False,
         "destructiveHint": False,
         "idempotentHint": True,
-    }
+    },
 )
 def strategyzr_create_vpc(
     company_name: Annotated[str, Field(description="Company or product name")],
@@ -72,15 +90,11 @@ def strategyzr_create_vpc(
     competitors: Annotated[list[str] | None, Field(description="Optional list of competitor names")] = None,
     response_format: Annotated[Literal["markdown", "json"], Field(description="Output format")] = "markdown",
 ) -> str:
-    """
-    Create a Value Proposition Canvas with structured validation and quality scoring.
+    """Build a Value Proposition Canvas from customer jobs, pains, gains, and your value map.
 
-    Returns a complete VPC with:
-    - Organized customer profile (jobs, pains, gains)
-    - Value map (products/services, pain relievers, gain creators)
-    - Fit score (problem-solution fit, pain/gain coverage)
-    - Quality score based on 10 Characteristics of Great Value Propositions
-    - Validation results and improvement recommendations
+    Use when designing or documenting a value proposition for a specific customer segment.
+    Returns a complete VPC with fit score, quality score (10 Characteristics, max 50 pts),
+    validation results, and improvement recommendations.
     """
     vpc_input = VPCInput(
         company_name=company_name,
@@ -108,11 +122,12 @@ def strategyzr_create_vpc(
 # =============================================================================
 
 @mcp.tool(
+    name="create_bmc",
     annotations={
         "readOnlyHint": False,
         "destructiveHint": False,
         "idempotentHint": True,
-    }
+    },
 )
 def strategyzr_create_bmc(
     company_name: Annotated[str, Field(description="Company name")],
@@ -130,14 +145,11 @@ def strategyzr_create_bmc(
     vpc_data: Annotated[dict | None, Field(description="Optional VPC data for alignment check")] = None,
     response_format: Annotated[Literal["markdown", "json"], Field(description="Output format")] = "markdown",
 ) -> str:
-    """
-    Create a Business Model Canvas with structured validation and attractiveness scoring.
+    """Build a Business Model Canvas describing how a business creates, delivers, and captures value.
 
-    Returns a complete BMC with:
-    - All 9 building blocks organized
-    - Business Model Attractiveness score (7 dimensions)
-    - VPC alignment check (if vpc_data provided)
-    - Validation results and improvement recommendations
+    Use when mapping the 9 building blocks of a business model. Pass vpc_data to check alignment
+    with an existing Value Proposition Canvas. Returns attractiveness score (7 dimensions, max 35 pts),
+    validation results, and improvement recommendations.
     """
     bmc_input = BMCInput(
         company_name=company_name,
@@ -172,11 +184,12 @@ def strategyzr_create_bmc(
 # =============================================================================
 
 @mcp.tool(
+    name="validate",
     annotations={
         "readOnlyHint": True,
         "destructiveHint": False,
         "idempotentHint": True,
-    }
+    },
 )
 def strategyzr_validate_canvas(
     canvas_type: Annotated[Literal["vpc", "bmc"], Field(description="Type of canvas to validate")],
@@ -184,15 +197,11 @@ def strategyzr_validate_canvas(
     check_vpc_alignment: Annotated[bool, Field(description="For BMC, whether to check VPC alignment")] = False,
     vpc_data: Annotated[dict | None, Field(description="VPC data for alignment check (required if check_vpc_alignment is True)")] = None,
 ) -> str:
-    """
-    Validate and score an existing canvas against best practices.
+    """Score and validate an existing VPC or BMC against Osterwalder best practices.
 
-    Returns:
-    - Validation results (errors, warnings, suggestions)
-    - Quality score with breakdown
-    - Gap analysis
-    - Prioritized improvement recommendations
-    - VPC alignment check (for BMC with vpc_data)
+    Use when the user has canvas data and wants quality feedback or gap analysis.
+    Returns validation results (errors, warnings, suggestions), quality score with
+    breakdown, gap analysis, and prioritized improvement recommendations.
     """
     result = validate_canvas(canvas_type, canvas_data, check_vpc_alignment, vpc_data)
     return json.dumps(result, indent=2, default=str)
@@ -203,26 +212,23 @@ def strategyzr_validate_canvas(
 # =============================================================================
 
 @mcp.tool(
+    name="analyze_fit",
     annotations={
         "readOnlyHint": True,
         "destructiveHint": False,
         "idempotentHint": True,
-    }
+    },
 )
 def strategyzr_analyze_fit(
     vpc_data: Annotated[dict, Field(description="VPC data to analyze")],
     bmc_data: Annotated[dict | None, Field(description="Optional BMC data for cross-canvas analysis")] = None,
     analysis_depth: Annotated[Literal["quick", "detailed"], Field(description="Analysis depth")] = "detailed",
 ) -> str:
-    """
-    Analyze the fit between VPC and BMC.
+    """Measure Problem-Solution Fit, Product-Market Fit indicators, and VPC-BMC alignment.
 
-    Returns:
-    - Problem-Solution Fit score
-    - Product-Market Fit indicators
-    - VPC-BMC alignment assessment (if bmc_data provided)
-    - Recommendations for improving fit
-    - Interpretation of scores
+    Use when you need to assess how well a value proposition addresses customer needs.
+    Pass bmc_data to also check business model alignment. Returns fit scores (>70% = strong),
+    coverage analysis, and recommendations for improving fit.
     """
     result = analyze_fit(vpc_data, bmc_data, analysis_depth)
     return json.dumps(result, indent=2, default=str)
@@ -233,11 +239,12 @@ def strategyzr_analyze_fit(
 # =============================================================================
 
 @mcp.tool(
+    name="compare",
     annotations={
         "readOnlyHint": True,
         "destructiveHint": False,
         "idempotentHint": True,
-    }
+    },
 )
 def strategyzr_compare_competitors(
     company_name: Annotated[str, Field(description="Your company name")],
@@ -245,57 +252,30 @@ def strategyzr_compare_competitors(
     competitors: Annotated[list[dict], Field(description="List of competitor data. Each: {name, pain_relievers: [...], gain_creators: [...]}")],
     market_context: Annotated[str | None, Field(description="Optional market context description")] = None,
 ) -> str:
-    """
-    Map competitor value propositions for differentiation analysis.
+    """Map competitor value propositions against yours for differentiation analysis.
 
-    Returns:
-    - Your strengths (unique pain relievers/gain creators)
-    - Your weaknesses (competitor advantages)
-    - Competitive threats (high-overlap competitors)
-    - Differentiation opportunities
-    - 'Difficult to copy' assessment
-    - Positioning recommendations and statement
+    Use when the user wants to understand competitive positioning or find differentiation
+    opportunities. Returns strengths, weaknesses, competitive threats, differentiation
+    opportunities, 'difficult to copy' assessment, and positioning recommendations.
     """
     result = compare_competitors(company_name, your_vpc, competitors, market_context)
     return json.dumps(result, indent=2, default=str)
 
 
 # =============================================================================
-# Tool 6: Get Template
-# =============================================================================
-
-@mcp.tool(
-    annotations={
-        "readOnlyHint": True,
-        "destructiveHint": False,
-        "idempotentHint": True,
-    }
-)
-def strategyzr_get_template(
-    template_type: Annotated[Literal["vpc", "bmc"], Field(description="Template type to retrieve")],
-    include_examples: Annotated[bool, Field(description="Include example values")] = False,
-    include_guidance: Annotated[bool, Field(description="Include filling guidance")] = True,
-) -> str:
-    """
-    Get empty canvas templates with field descriptions.
-
-    Returns:
-    - Empty template structure with all required fields
-    - Field descriptions and constraints
-    - Optional examples showing how to fill each section
-    - Guidance based on Osterwalder methodology
-    """
-    if template_type == "vpc":
-        template = get_vpc_template(include_examples, include_guidance)
-    else:
-        template = get_bmc_template(include_examples, include_guidance)
-
-    return json.dumps(template, indent=2)
-
-
-# =============================================================================
 # Resources
 # =============================================================================
+
+@mcp.resource("strategyzr://template/vpc")
+def get_vpc_template_resource() -> str:
+    """VPC template with examples and guidance for filling each section."""
+    return json.dumps(get_vpc_template(include_examples=True, include_guidance=True), indent=2)
+
+
+@mcp.resource("strategyzr://template/bmc")
+def get_bmc_template_resource() -> str:
+    """BMC template with examples and guidance for filling each section."""
+    return json.dumps(get_bmc_template(include_examples=True, include_guidance=True), indent=2)
 
 @mcp.resource("strategyzr://methodology")
 def get_methodology() -> str:
@@ -434,7 +414,7 @@ How do you create each customer gain?
 
 ---
 
-Once you provide this information, use the strategyzr_create_vpc tool to generate your complete canvas with scores and recommendations.
+Once you provide this information, use the create_vpc tool to generate your complete canvas with scores and recommendations.
 """
 
 
@@ -490,7 +470,7 @@ What are your main costs?
 
 ---
 
-Once you provide this information, use the strategyzr_create_bmc tool to generate your complete canvas with attractiveness scores and recommendations.
+Once you provide this information, use the create_bmc tool to generate your complete canvas with attractiveness scores and recommendations.
 """
 
 
@@ -501,23 +481,27 @@ def strategy_review(canvas_type: str) -> str:
 
 Let's review and improve your {'Value Proposition Canvas' if canvas_type == 'vpc' else 'Business Model Canvas'}.
 
+## What I need from you
+- Your canvas data (JSON from a previous create_vpc or create_bmc call, or raw dict)
+- Optionally: competitor data for positioning analysis
+
 ## Review Process
 
 1. **Validation Check**
-   - Use strategyzr_validate_canvas to check for issues
-   - Address any errors and warnings
+   - Use the `validate` tool to check for errors, warnings, and gaps
+   - Address any critical issues first
 
 2. **Quality Assessment**
-   - Review your quality scores
-   - Identify lowest-scoring dimensions
+   - Review quality scores and breakdown by dimension
+   - Identify lowest-scoring dimensions for targeted improvement
 
 3. **Fit Analysis**
-   - Use strategyzr_analyze_fit to check internal consistency
-   - For BMC: check VPC alignment
+   - Use `analyze_fit` to measure Problem-Solution Fit and internal consistency
+   - For BMC: pass vpc_data to check VPC-BMC alignment
 
 4. **Competitive Position**
-   - Use strategyzr_compare_competitors to understand differentiation
-   - Identify opportunities
+   - Use `compare` with competitor pain_relievers and gain_creators
+   - Identify differentiation opportunities and competitive threats
 
 ## Improvement Framework
 

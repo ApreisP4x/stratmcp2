@@ -37,7 +37,7 @@ server.py     → MCP server hub (registers tools, resources, prompts)
 
 ### Key Components
 
-- **server.py**: FastMCP server with 6 tools, 2 resources, 3 prompts, and `/health` endpoint
+- **server.py**: FastMCP server with 5 tools, 4 resources, 3 prompts, and `/health` endpoint
 - **models/common.py**: 11 enums (JobType, GainType, RelationshipType, etc.) and base models
 - **models/vpc.py**: Customer profile and value map models (CustomerJob, CustomerPain, PainReliever, etc.)
 - **models/bmc.py**: 9 building blocks of BMC (CustomerSegment, ValueProposition, RevenueStream, etc.)
@@ -51,7 +51,7 @@ All tools use annotations:
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True})
 ```
 
-Tools: `strategyzr_create_vpc`, `strategyzr_create_bmc`, `strategyzr_validate_canvas`, `strategyzr_analyze_fit`, `strategyzr_compare_competitors`, `strategyzr_get_template`
+Tools: `create_vpc`, `create_bmc`, `validate`, `analyze_fit`, `compare`
 
 ## Quality Scoring Frameworks
 
