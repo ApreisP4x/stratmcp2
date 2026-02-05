@@ -14,6 +14,7 @@ This server provides 6 tools:
 """
 
 import json
+import os
 from typing import Any, Literal, Annotated
 
 from fastmcp import FastMCP
@@ -539,12 +540,29 @@ Provide your canvas data and I'll help you analyze and improve it.
 
 
 # =============================================================================
+# Health Check Endpoint
+# =============================================================================
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check():
+    """Health check endpoint for deployment monitoring."""
+    from starlette.responses import JSONResponse
+    return JSONResponse({"status": "healthy", "server": "strategyzr_mcp"})
+
+
+# =============================================================================
 # Main entry point
 # =============================================================================
 
 def main():
     """Run the MCP server."""
-    mcp.run()
+    transport = os.environ.get("MCP_TRANSPORT", "stdio")
+    if transport == "http":
+        host = "0.0.0.0"
+        port = int(os.environ.get("PORT", 8000))
+        mcp.run(transport="http", host=host, port=port)
+    else:
+        mcp.run()  # Default stdio for local use
 
 
 if __name__ == "__main__":
