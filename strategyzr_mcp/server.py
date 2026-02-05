@@ -4,13 +4,14 @@ StrategyZR MCP Server - Alternative Implementation
 A structured data approach to Business Model Canvas and Value Proposition Canvas
 using Pydantic models for validation and computed quality scores.
 
-This server provides 6 tools:
+This server provides 7 tools:
 1. strategyzr_create_vpc - Create a Value Proposition Canvas
 2. strategyzr_create_bmc - Create a Business Model Canvas
 3. strategyzr_validate_canvas - Validate and score an existing canvas
 4. strategyzr_analyze_fit - Analyze fit between VPC and BMC
 5. strategyzr_compare_competitors - Competitive analysis
 6. strategyzr_get_template - Get empty canvas templates
+7. strategyzr_export_bmc_pdf - Export BMC to filled PDF template
 """
 
 import json
@@ -23,7 +24,7 @@ from pydantic import Field
 from .models.vpc import VPCInput
 from .models.bmc import BMCInput
 from .tools.vpc_tools import create_vpc, get_vpc_template
-from .tools.bmc_tools import create_bmc, get_bmc_template
+from .tools.bmc_tools import create_bmc, get_bmc_template, export_bmc_pdf
 from .tools.analysis_tools import validate_canvas, analyze_fit, compare_competitors
 
 # Initialize FastMCP server
@@ -294,6 +295,46 @@ def strategyzr_get_template(
 
 
 # =============================================================================
+# Tool 7: Export BMC to PDF
+# =============================================================================
+
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+    }
+)
+def strategyzr_export_bmc_pdf(
+    bmc_data: Annotated[dict, Field(description="BMC data dictionary with all 9 building blocks")],
+    designed_for: Annotated[str | None, Field(description="'Designed for' field (company/project name)")] = None,
+    designed_by: Annotated[str | None, Field(description="'Designed by' field (author name)")] = None,
+    version: Annotated[str | None, Field(description="Version string for the canvas")] = None,
+) -> str:
+    """
+    Export a Business Model Canvas to a filled PDF template.
+
+    Takes BMC data and fills the Strategyzer BMC PDF template
+    with content from all 9 building blocks.
+
+    Returns JSON with:
+    - pdf: Base64-encoded PDF content
+    - format: "base64"
+    - warnings: List of any warnings (e.g., truncated content)
+    - metadata: Details about truncations and font reductions
+
+    To use the PDF, decode the base64 string and save as a .pdf file.
+    """
+    result = export_bmc_pdf(
+        bmc_data=bmc_data,
+        designed_for=designed_for,
+        designed_by=designed_by,
+        version=version,
+    )
+    return json.dumps(result, indent=2)
+
+
+# =============================================================================
 # Resources
 # =============================================================================
 
@@ -543,8 +584,7 @@ Provide your canvas data and I'll help you analyze and improve it.
 # Health Check Endpoint
 # =============================================================================
 
-@mcp.custom_route("/health", methods=["GET"])
-async def health_check():
+async def health_check(request):
     """Health check endpoint for deployment monitoring."""
     from starlette.responses import JSONResponse
     return JSONResponse({"status": "healthy", "server": "strategyzr_mcp"})
@@ -558,9 +598,12 @@ def main():
     """Run the MCP server."""
     transport = os.environ.get("MCP_TRANSPORT", "stdio")
     if transport == "http":
+        import uvicorn
         host = "0.0.0.0"
         port = int(os.environ.get("PORT", 8000))
-        mcp.run(transport="http", host=host, port=port)
+        app = mcp.http_app()
+        app.add_route("/health", health_check, methods=["GET"])
+        uvicorn.run(app, host=host, port=port)
     else:
         mcp.run()  # Default stdio for local use
 
