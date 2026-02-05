@@ -1,0 +1,408 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Business Model Canvas Template",
+  "description": "Template for creating a Business Model Canvas based on Osterwalder's framework",
+  "type": "object",
+  "required": [
+    "company_name",
+    "industry",
+    "business_stage",
+    "customer_segments",
+    "value_propositions",
+    "channels",
+    "customer_relationships",
+    "revenue_streams",
+    "key_resources",
+    "key_activities",
+    "key_partnerships",
+    "cost_structure"
+  ],
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Company name",
+      "minLength": 1
+    },
+    "industry": {
+      "type": "string",
+      "description": "Industry/sector",
+      "minLength": 2
+    },
+    "business_stage": {
+      "type": "string",
+      "enum": ["idea", "startup", "growth", "mature"],
+      "description": "Stage of business development"
+    },
+    "customer_segments": {
+      "type": "array",
+      "description": "Customer segments the business serves",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["name", "description", "segment_type"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Segment name",
+            "minLength": 2
+          },
+          "description": {
+            "type": "string",
+            "description": "Segment description",
+            "minLength": 5
+          },
+          "segment_type": {
+            "type": "string",
+            "enum": ["mass_market", "niche", "segmented", "diversified", "multi_sided"],
+            "description": "Type of customer segment"
+          },
+          "size_estimate": {
+            "type": "string",
+            "description": "Estimated market size (optional)"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "description": "Whether this is the primary segment",
+            "default": false
+          }
+        }
+      }
+    },
+    "value_propositions": {
+      "type": "array",
+      "description": "Value propositions for customer segments",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["description", "target_segment", "value_type"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "The value proposition statement",
+            "minLength": 5
+          },
+          "target_segment": {
+            "type": "string",
+            "description": "Which customer segment this serves"
+          },
+          "value_type": {
+            "type": "string",
+            "enum": [
+              "newness",
+              "performance",
+              "customization",
+              "design",
+              "brand",
+              "price",
+              "cost_reduction",
+              "risk_reduction",
+              "accessibility",
+              "convenience"
+            ],
+            "description": "Type of value delivered"
+          },
+          "differentiation": {
+            "type": "string",
+            "description": "How this differs from competitors (optional)"
+          },
+          "vpc_reference": {
+            "type": "string",
+            "description": "Reference to detailed VPC if available (optional)"
+          }
+        }
+      }
+    },
+    "channels": {
+      "type": "array",
+      "description": "Channels to reach customers",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["name", "channel_type", "phases"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Channel name",
+            "minLength": 2
+          },
+          "channel_type": {
+            "type": "string",
+            "enum": ["direct", "indirect", "owned", "partner"],
+            "description": "Type of channel"
+          },
+          "phases": {
+            "type": "array",
+            "description": "Customer journey phases covered",
+            "items": {
+              "type": "string",
+              "enum": ["awareness", "evaluation", "purchase", "delivery", "after_sales"]
+            },
+            "minItems": 1
+          },
+          "is_primary": {
+            "type": "boolean",
+            "description": "Whether this is a primary channel",
+            "default": false
+          },
+          "description": {
+            "type": "string",
+            "description": "Additional details (optional)"
+          }
+        }
+      }
+    },
+    "customer_relationships": {
+      "type": "array",
+      "description": "Types of relationships with customers",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["segment", "relationship_type", "motivation"],
+        "properties": {
+          "segment": {
+            "type": "string",
+            "description": "Which customer segment"
+          },
+          "relationship_type": {
+            "type": "string",
+            "enum": [
+              "personal_assistance",
+              "dedicated_assistance",
+              "self_service",
+              "automated",
+              "communities",
+              "co_creation"
+            ],
+            "description": "Type of relationship"
+          },
+          "motivation": {
+            "type": "string",
+            "description": "Motivation: acquisition, retention, or upselling"
+          },
+          "description": {
+            "type": "string",
+            "description": "How this relationship works (optional)"
+          }
+        }
+      }
+    },
+    "revenue_streams": {
+      "type": "array",
+      "description": "Sources of revenue",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["name", "source_segment", "revenue_type", "pricing_mechanism"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Revenue stream name",
+            "minLength": 2
+          },
+          "source_segment": {
+            "type": "string",
+            "description": "Which customer segment pays"
+          },
+          "revenue_type": {
+            "type": "string",
+            "enum": [
+              "asset_sale",
+              "usage_fee",
+              "subscription",
+              "lending",
+              "licensing",
+              "brokerage",
+              "advertising"
+            ],
+            "description": "Type of revenue"
+          },
+          "pricing_mechanism": {
+            "type": "string",
+            "enum": [
+              "fixed",
+              "dynamic",
+              "auction",
+              "market_dependent",
+              "volume_dependent",
+              "negotiation"
+            ],
+            "description": "How pricing works"
+          },
+          "percentage_of_revenue": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Estimated percentage of total revenue (optional)"
+          },
+          "is_recurring": {
+            "type": "boolean",
+            "description": "Whether this is recurring revenue",
+            "default": false
+          }
+        }
+      }
+    },
+    "key_resources": {
+      "type": "array",
+      "description": "Key resources required",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["name", "resource_type", "description", "criticality"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Resource name",
+            "minLength": 2
+          },
+          "resource_type": {
+            "type": "string",
+            "enum": ["physical", "intellectual", "human", "financial"],
+            "description": "Type of resource"
+          },
+          "description": {
+            "type": "string",
+            "description": "Resource description",
+            "minLength": 5
+          },
+          "is_owned": {
+            "type": "boolean",
+            "description": "Whether the resource is owned vs accessed",
+            "default": true
+          },
+          "criticality": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "How critical (1=helpful, 5=essential)"
+          }
+        }
+      }
+    },
+    "key_activities": {
+      "type": "array",
+      "description": "Key activities required",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["name", "activity_type", "description", "frequency"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Activity name",
+            "minLength": 2
+          },
+          "activity_type": {
+            "type": "string",
+            "enum": ["production", "problem_solving", "platform"],
+            "description": "Type of activity"
+          },
+          "description": {
+            "type": "string",
+            "description": "What this activity involves",
+            "minLength": 5
+          },
+          "frequency": {
+            "type": "string",
+            "description": "How often: daily, weekly, monthly, ongoing, as_needed"
+          }
+        }
+      }
+    },
+    "key_partnerships": {
+      "type": "array",
+      "description": "Key partnerships",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["partner_name", "partnership_type", "motivation"],
+        "properties": {
+          "partner_name": {
+            "type": "string",
+            "description": "Partner name or type",
+            "minLength": 2
+          },
+          "partnership_type": {
+            "type": "string",
+            "enum": ["strategic_alliance", "coopetition", "joint_venture", "buyer_supplier"],
+            "description": "Type of partnership"
+          },
+          "motivation": {
+            "type": "string",
+            "description": "Why: optimization, risk_reduction, resource_acquisition"
+          },
+          "key_activities": {
+            "type": "array",
+            "description": "Activities this partner supports",
+            "items": {
+              "type": "string"
+            }
+          },
+          "key_resources": {
+            "type": "array",
+            "description": "Resources this partner provides",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "cost_structure": {
+      "type": "array",
+      "description": "Cost structure items",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["name", "cost_type", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Cost item name",
+            "minLength": 2
+          },
+          "cost_type": {
+            "type": "string",
+            "enum": ["fixed", "variable"],
+            "description": "Fixed or variable cost"
+          },
+          "description": {
+            "type": "string",
+            "description": "What this cost covers",
+            "minLength": 5
+          },
+          "is_key_cost": {
+            "type": "boolean",
+            "description": "Whether this is one of the largest costs",
+            "default": false
+          },
+          "percentage_of_costs": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Estimated percentage of total costs (optional)"
+          }
+        }
+      }
+    },
+    "vpc_reference": {
+      "type": "string",
+      "description": "Reference to existing VPC for alignment check (optional)"
+    },
+    "response_format": {
+      "type": "string",
+      "enum": ["markdown", "json"],
+      "description": "Output format",
+      "default": "markdown"
+    }
+  }
+}

@@ -1,0 +1,237 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Value Proposition Canvas Template",
+  "description": "Template for creating a Value Proposition Canvas based on Osterwalder's framework",
+  "type": "object",
+  "required": [
+    "company_name",
+    "target_segment",
+    "customer_jobs",
+    "customer_pains",
+    "customer_gains",
+    "products_services",
+    "pain_relievers",
+    "gain_creators"
+  ],
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Company or product name",
+      "minLength": 1
+    },
+    "target_segment": {
+      "type": "string",
+      "description": "Target customer segment (be specific)",
+      "minLength": 3
+    },
+    "customer_jobs": {
+      "type": "array",
+      "description": "Jobs the customer is trying to get done (3-5 recommended)",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["description", "job_type", "importance"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "What the customer is trying to accomplish",
+            "minLength": 5
+          },
+          "job_type": {
+            "type": "string",
+            "enum": ["functional", "social", "emotional"],
+            "description": "Type: functional (tasks), social (perception), emotional (feelings)"
+          },
+          "importance": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Importance to customer (1=low, 5=critical)"
+          },
+          "context": {
+            "type": "string",
+            "description": "Situational context for this job (optional)"
+          }
+        }
+      }
+    },
+    "customer_pains": {
+      "type": "array",
+      "description": "Customer pains and frustrations (3-5 recommended)",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["description", "intensity", "frequency"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "The pain or frustration",
+            "minLength": 5
+          },
+          "intensity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Severity (1=minor annoyance, 5=extreme pain)"
+          },
+          "frequency": {
+            "type": "string",
+            "enum": ["rarely", "sometimes", "often", "always"],
+            "description": "How often this pain occurs"
+          },
+          "related_job": {
+            "type": "string",
+            "description": "Which customer job this pain relates to (optional)"
+          }
+        }
+      }
+    },
+    "customer_gains": {
+      "type": "array",
+      "description": "Desired customer gains (3-5 recommended)",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["description", "gain_type", "relevance"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "The desired outcome or benefit",
+            "minLength": 5
+          },
+          "gain_type": {
+            "type": "string",
+            "enum": ["required", "expected", "desired", "unexpected"],
+            "description": "Type: required (must-have), expected (basic), desired (nice-to-have), unexpected (delight)"
+          },
+          "relevance": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Relevance to customer (1=nice, 5=essential)"
+          },
+          "related_job": {
+            "type": "string",
+            "description": "Which customer job this gain relates to (optional)"
+          }
+        }
+      }
+    },
+    "products_services": {
+      "type": "array",
+      "description": "Products and services offered",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["name", "description", "importance"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Product or service name",
+            "minLength": 2
+          },
+          "description": {
+            "type": "string",
+            "description": "What it does",
+            "minLength": 5
+          },
+          "importance": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "How central to value proposition (1=peripheral, 5=core)"
+          },
+          "is_digital": {
+            "type": "boolean",
+            "description": "Whether this is a digital product/service",
+            "default": false
+          },
+          "is_tangible": {
+            "type": "boolean",
+            "description": "Whether this is a tangible product",
+            "default": true
+          }
+        }
+      }
+    },
+    "pain_relievers": {
+      "type": "array",
+      "description": "How you relieve customer pains",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["description", "addresses_pain", "effectiveness"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "How this relieves pain",
+            "minLength": 5
+          },
+          "addresses_pain": {
+            "type": "string",
+            "description": "Which customer pain this addresses"
+          },
+          "effectiveness": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "How effectively it relieves pain (1=slightly, 5=completely)"
+          },
+          "product_service": {
+            "type": "string",
+            "description": "Which product/service delivers this (optional)"
+          }
+        }
+      }
+    },
+    "gain_creators": {
+      "type": "array",
+      "description": "How you create customer gains",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["description", "creates_gain", "effectiveness"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "How this creates gain",
+            "minLength": 5
+          },
+          "creates_gain": {
+            "type": "string",
+            "description": "Which customer gain this creates"
+          },
+          "effectiveness": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "How effectively it creates gain (1=slightly, 5=completely)"
+          },
+          "product_service": {
+            "type": "string",
+            "description": "Which product/service delivers this (optional)"
+          }
+        }
+      }
+    },
+    "competitors": {
+      "type": "array",
+      "description": "Competitor names for context (optional)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "response_format": {
+      "type": "string",
+      "enum": ["markdown", "json"],
+      "description": "Output format",
+      "default": "markdown"
+    }
+  }
+}
